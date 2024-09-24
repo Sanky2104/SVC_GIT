@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Upload</title>
+</head>
+
+<body>
+
+    <a href="https://sanskriti21.auth.us-east-1.amazoncognito.com/logout?client_id=5vi92hmq6103jsdmpkbsiq9pe1&response_type=code&scope=email+openid+phone&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fcheck.html">Log Out</a>
+<h2>Upload a File</h2>
+
+<input type="file" id="fileInput" accept=".txt, .pdf, .doc, .docx" onchange = "toBase64()">
+
+<button onclick="uploadFile()">Upload</button>
+
+<p id="fileName"></p>
+
+<script>
+    let base64str= ""
+    function toBase64(){
+        let file = document.getElementById('fileInput')['files'][0]
+        let reader = new FileReader()
+
+        reader.onload = function () {
+            base64str = reader.result
+        }
+
+        reader.readAsDataURL(file)
+    }
+    function uploadFile() {
+        const fileNameDisplay = document.getElementById('fileName');
+    
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const fileName = file.name;
+            fileNameDisplay.textContent = "File Name: " + fileName;
+    
+            // Prepare the URL by dynamically adding bucket and filename
+            // Example URL setup, replace 'yourBucketName' and append actual fileName
+            const uploadUrl = 'https://xl5bhklc20.execute-api.us-east-1.amazonaws.com/csmproj/add';
+    
+                // Send a PUT request with the binary data
+                fetch(uploadUrl, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json", // Changed to octet-stream
+                    },
+                    body:JSON.stringify({
+                        "content":base64str,
+                        "filename":fileName
+                    })
+                     // Send the binary data directly
+                }).then(res=>{
+                    return res.json()
+                })
+                .then(response => {
+                    console.log(response.body)
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }else {
+            fileNameDisplay.textContent = "Please select a file";
+        }
+    }
+</script>
+</body>
+</html>
+
